@@ -22,6 +22,10 @@ void SDImage::dump_config() {
   ESP_LOGCONFIG(TAG, "SD Image:");
   ESP_LOGCONFIG(TAG, "  Path: %s", this->path_.c_str());
   ESP_LOGCONFIG(TAG, "  Type: %d", this->type_);
+  ESP_LOGCONFIG(TAG, "  Transparency: %d", this->transparency_);
+  ESP_LOGCONFIG(TAG, "  Dither: %d", this->dither_);
+  ESP_LOGCONFIG(TAG, "  Invert Alpha: %s", this->invert_alpha_ ? "YES" : "NO");
+  ESP_LOGCONFIG(TAG, "  Big Endian: %s", this->big_endian_ ? "YES" : "NO");
   ESP_LOGCONFIG(TAG, "  Size: %dx%d", this->width_, this->height_);
   ESP_LOGCONFIG(TAG, "  Loaded: %s", this->loaded_ ? "YES" : "NO");
 }

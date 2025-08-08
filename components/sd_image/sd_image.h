@@ -32,8 +32,17 @@ enum DitherType {
   DITHER_FLOYDSTEINBERG,
 };
 
-class SDImage : public image::Image {
+class SDImage : public image::Image, public Component {
  public:
+  // Constructeur avec les paramètres nécessaires pour image::Image
+  SDImage(const uint8_t *data_start, int width, int height, image::ImageType type, image::TransparencyType transparency = image::TRANSPARENCY_OPAQUE) 
+    : image::Image(data_start, width, height, type, transparency) {
+  }
+  
+  // Constructeur par défaut
+  SDImage() : image::Image(nullptr, 0, 0, image::IMAGE_TYPE_RGB565, image::TRANSPARENCY_OPAQUE) {
+  }
+  
   void setup() override;
   void dump_config() override;
   

@@ -12,10 +12,14 @@ from esphome.const import (
 from esphome.components.display import DisplayRef
 
 CODEOWNERS = ["@yourusername"]
-DEPENDENCIES = ["display"]
+DEPENDENCIES = ["display", "image"]
 
 sd_image_ns = cg.esphome_ns.namespace("sd_image")
-SDImage = sd_image_ns.class_("SDImage", cg.Component)
+image_ns = cg.esphome_ns.namespace("image")
+
+# Hériter de image::Image pour la compatibilité
+Image = image_ns.class_("Image")
+SDImage = sd_image_ns.class_("SDImage", Image)
 
 ImageType = sd_image_ns.enum("ImageType")
 IMAGE_TYPES = {

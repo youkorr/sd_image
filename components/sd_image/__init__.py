@@ -14,12 +14,15 @@ from esphome.components.display import DisplayRef
 CODEOWNERS = ["@yourusername"]
 DEPENDENCIES = ["display", "image"]
 
+# Import des namespaces
 sd_image_ns = cg.esphome_ns.namespace("sd_image")
 image_ns = cg.esphome_ns.namespace("image")
 
-# Hériter de image::Image pour la compatibilité
-Image = image_ns.class_("Image")
-SDImage = sd_image_ns.class_("SDImage", Image)
+# Import de la classe Image existante
+Image_ = image_ns.class_("Image")
+
+# Déclarer SDImage comme héritant de image::Image
+SDImage = sd_image_ns.class_("SDImage", Image_)
 
 ImageType = sd_image_ns.enum("ImageType")
 IMAGE_TYPES = {
@@ -77,6 +80,7 @@ CONFIG_SCHEMA = cv.Schema({
 }).extend(cv.COMPONENT_SCHEMA)
 
 async def to_code(config):
+    # Important : déclarer avec le bon type pour l'héritage
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     
@@ -89,3 +93,12 @@ async def to_code(config):
     
     if CONF_RESIZE in config:
         cg.add(var.set_resize(config[CONF_RESIZE][0], config[CONF_RESIZE][1]))
+    
+    # Alternative : Créer un type spécialisé reconnu par LVGL
+INSTANCE_TYPE = SDImage
+
+# Enregistrer dans le registre des images
+def register_sd_image(var, config):
+    """Enregistrer l'image SD comme compatible image"""
+    cg.add_define("USE_SD_IMAGE")
+    return var

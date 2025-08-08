@@ -4,7 +4,6 @@
 #include "esphome/core/color.h"
 #include "esphome/components/display/display_buffer.h"
 #include <string>
-#include "../sd_mmc_card/sd_mmc_card.h"
 
 #ifdef USE_ESP_IDF
 #include "esp_jpeg_dec.h"

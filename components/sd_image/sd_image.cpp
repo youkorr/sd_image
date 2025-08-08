@@ -1,6 +1,7 @@
 #include "sd_image.h"
 #include "esphome/core/log.h"
 #include <cstring>
+#include <algorithm>
 
 #ifdef USE_ESP_IDF
 #include <stdio.h>
@@ -15,7 +16,7 @@ static const char *const TAG = "sd_image";
 
 void SDImage::setup() {
   ESP_LOGCONFIG(TAG, "Setting up SD Image...");
-  this->load_image();
+  // Ne pas charger au setup, charger à la demande
 }
 
 void SDImage::dump_config() {
@@ -304,7 +305,21 @@ void SDImage::convert_to_rgb(uint8_t *src, int width, int height, int channels) 
   }
 }
 
-void SDImage::draw(display::Display *display, int x, int y) {
+int SDImage::get_width() {
+  if (!this->load_image()) {
+    return 0;
+  }
+  return this->width_;
+}
+
+int SDImage::get_height() {
+  if (!this->load_image()) {
+    return 0;
+  }
+  return this->height_;
+}
+
+void SDImage::draw(int x, int y, display::Display *display, Color color_on, Color color_off) {
   if (!this->load_image()) {
     return;
   }
@@ -315,6 +330,18 @@ void SDImage::draw(display::Display *display, int x, int y) {
       Color color;
       
       switch (this->type_) {
+        case IMAGE_TYPE_BINARY: {
+          int byte_idx = dy * ((this->width_ + 7) / 8) + dx / 8;
+          int bit_idx = 7 - (dx % 8);
+          bool pixel = (this->image_data_[byte_idx] >> bit_idx) & 1;
+          color = pixel ? color_on : color_off;
+          break;
+        }
+        case IMAGE_TYPE_GRAYSCALE: {
+          uint8_t gray = this->image_data_[dy * this->width_ + dx];
+          color = Color(gray, gray, gray);
+          break;
+        }
         case IMAGE_TYPE_RGB565: {
           uint16_t *rgb565_data = (uint16_t *)this->image_data_;
           uint16_t pixel = rgb565_data[dy * this->width_ + dx];
@@ -331,17 +358,11 @@ void SDImage::draw(display::Display *display, int x, int y) {
                        this->image_data_[idx + 2]);
           break;
         }
-        // ... autres formats
       }
       
       display->draw_pixel_at(x + dx, y + dy, color);
     }
   }
-}
-
-void SDImage::draw(display::Display *display, int x, int y, Color color_on, Color color_off) {
-  // Version pour images binaires
-  this->draw(display, x, y);
 }
 
 }  // namespace sd_image

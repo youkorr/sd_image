@@ -3,6 +3,7 @@
 #include "esphome/core/component.h"
 #include "esphome/core/color.h"
 #include "esphome/components/display/display_buffer.h"
+#include "esphome/components/image/image.h"
 #include <string>
 
 #ifdef USE_ESP_IDF
@@ -31,7 +32,7 @@ enum DitherType {
   DITHER_FLOYDSTEINBERG,
 };
 
-class SDImage : public Component {
+class SDImage : public image::Image {
  public:
   void setup() override;
   void dump_config() override;
@@ -47,13 +48,10 @@ class SDImage : public Component {
     this->resize_height_ = height; 
   }
   
-  // Méthodes pour dessiner l'image
-  void draw(display::Display *display, int x, int y);
-  void draw(display::Display *display, int x, int y, Color color_on, Color color_off = Color::BLACK);
-  
-  // Obtenir les dimensions de l'image
-  int get_width() const { return this->width_; }
-  int get_height() const { return this->height_; }
+  // Surcharger les méthodes de image::Image
+  void draw(int x, int y, display::Display *display, Color color_on, Color color_off) override;
+  int get_width() override;
+  int get_height() override;
   
   // Forcer le rechargement
   void reload() { this->loaded_ = false; }

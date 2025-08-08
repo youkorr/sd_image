@@ -4,6 +4,7 @@
 #include "esphome/core/color.h"
 #include "esphome/components/display/display_buffer.h"
 #include <string>
+#include "../sd_mmc_card/sd_mmc_card.h"
 
 #ifdef USE_ESP_IDF
 #include "esp_jpeg_dec.h"
@@ -20,6 +21,17 @@ enum ImageType {
   IMAGE_TYPE_RGB,
 };
 
+enum TransparencyType {
+  TRANSPARENCY_OPAQUE = 0,
+  TRANSPARENCY_CHROMA_KEY,
+  TRANSPARENCY_ALPHA_CHANNEL,
+};
+
+enum DitherType {
+  DITHER_NONE = 0,
+  DITHER_FLOYDSTEINBERG,
+};
+
 class SDImage : public Component {
  public:
   void setup() override;
@@ -27,6 +39,10 @@ class SDImage : public Component {
   
   void set_path(const std::string &path) { this->path_ = path; }
   void set_image_type(ImageType type) { this->type_ = type; }
+  void set_transparency(TransparencyType transparency) { this->transparency_ = transparency; }
+  void set_dither(DitherType dither) { this->dither_ = dither; }
+  void set_invert_alpha(bool invert) { this->invert_alpha_ = invert; }
+  void set_big_endian(bool big_endian) { this->big_endian_ = big_endian; }
   void set_resize(int width, int height) { 
     this->resize_width_ = width; 
     this->resize_height_ = height; 
@@ -55,6 +71,10 @@ class SDImage : public Component {
   
   std::string path_;
   ImageType type_ = IMAGE_TYPE_RGB565;
+  TransparencyType transparency_ = TRANSPARENCY_OPAQUE;
+  DitherType dither_ = DITHER_NONE;
+  bool invert_alpha_ = false;
+  bool big_endian_ = false;
   int resize_width_ = 0;
   int resize_height_ = 0;
   

@@ -47,7 +47,7 @@ DITHER_TYPES = {
 }
 
 # Schéma pour une seule image
-SINGLE_IMAGE_SCHEMA = cv.Schema({
+IMAGE_SCHEMA = cv.Schema({
     cv.GenerateID(): cv.declare_id(SDImage),
     cv.Required(CONF_PATH): cv.string,
     cv.Optional(CONF_WIDTH): cv.positive_int,
@@ -60,21 +60,19 @@ SINGLE_IMAGE_SCHEMA = cv.Schema({
     cv.Optional(CONF_DITHER, default="NONE"): cv.enum(DITHER_TYPES, upper=True),
 }).extend(cv.COMPONENT_SCHEMA)
 
-# Schéma principal - peut être une liste d'images
-CONFIG_SCHEMA = cv.Any(
-    cv.ensure_list(SINGLE_IMAGE_SCHEMA),  # Liste d'images
-    SINGLE_IMAGE_SCHEMA,  # Image unique
-)
+# Version simple pour débugger
+CONFIG_SCHEMA = cv.Schema({
+    cv.GenerateID(): cv.declare_id(SDImage),
+    cv.Required(CONF_PATH): cv.string,
+    cv.Optional(CONF_TYPE, default="RGB565"): cv.enum(IMAGE_TYPES, upper=True),
+    cv.Optional(CONF_RESIZE): cv.dimensions,
+    cv.Optional(CONF_TRANSPARENCY, default="OPAQUE"): cv.enum(TRANSPARENCY_TYPES, upper=True),
+    cv.Optional(CONF_BYTE_ORDER, default="LITTLE_ENDIAN"): cv.enum(BYTE_ORDER_TYPES, upper=True),
+    cv.Optional(CONF_INVERT_ALPHA, default=False): cv.boolean,
+    cv.Optional(CONF_DITHER, default="NONE"): cv.enum(DITHER_TYPES, upper=True),
+}).extend(cv.COMPONENT_SCHEMA)
 
 async def to_code(config):
-    # Si c'est une liste d'images
-    if isinstance(config, list):
-        for image_config in config:
-            await process_single_image(image_config)
-    else:
-        await process_single_image(config)
-
-async def process_single_image(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     
@@ -87,5 +85,3 @@ async def process_single_image(config):
     
     if CONF_RESIZE in config:
         cg.add(var.set_resize(config[CONF_RESIZE][0], config[CONF_RESIZE][1]))
-    elif CONF_WIDTH in config and CONF_HEIGHT in config:
-        cg.add(var.set_resize(config[CONF_WIDTH], config[CONF_HEIGHT]))
